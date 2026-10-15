@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Borne de Commande - Burgers</title>
+    <style>
+        :root {
+            --mcdo-green: #264F36;
+            --mcdo-yellow: #FFBC0D;
+            --mcdo-red: #DB0007;
+            --mcdo-dark: #1e1e1e;
+            --bg-light: #F8F9FA;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial Rounded MT Bold', sans-serif;
+            user-select: none;
+        }
+
+        body {
+            background-color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        /* Simule l'écran vertical de la borne */
+        .kiosk-screen {
+            width: 450px;
+            height: 800px;
+            background-color: var(--bg-light);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+            border: 8px solid #000;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        /* En-tête */
+        .kiosk-header {
+            background-color: var(--mcdo-green);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 18px;
+            border-bottom: 4px solid var(--mcdo-yellow);
+        }
+
+        .logo-m {
+            font-size: 26px;
+            color: var(--mcdo-yellow);
+            font-weight: 900;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        /* Zone de sélection des burgers */
+        .products-container {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .product-card {
+            background-color: white;
+            border-radius: 15px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: transform 0.1s ease, border-color 0.2s ease;
+        }
+
+        .product-card:active {
+            transform: scale(0.97);
+            border-color: var(--mcdo-yellow);
+        }
+
+        .product-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .product-icon {
+            font-size: 40px;
+        }
+
+        .product-details {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .product-name {
+            font-size: 16px;
+            font-weight: bold;
+            color: var(--mcdo-dark);
+        }
+
+        .product-price {
+            font-size: 15px;
+            font-weight: 800;
+            color: var(--mcdo-green);
+        }
+
+        .add-btn {
+            background-color: var(--mcdo-yellow);
+            border: none;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            font-size: 20px;
+            font-weight: bold;
+            color: var(--mcdo-dark);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Panier fixe en bas */
+        .kiosk-footer-cart {
+            background-color: white;
+            box-shadow: 0 -8px 25px rgba(0,0,0,0.1);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            border-top: 1px solid #e5e5e5;
+        }
+
+        .cart-summary {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .cart-title {
+            font-weight: bold;
+            color: #555;
+            font-size: 15px;
+        }
+
+        .cart-total {
+            font-size: 24px;
+            font-weight: 900;
+            color: var(--mcdo-dark);
+        }
+
+        /* Aperçu horizontal des articles */
+        .cart-items-preview {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            min-height: 55px;
+            align-items: center;
+            padding: 2px 0;
+        }
+
+        .cart-item-thumb {
+            width: 48px;
+            height: 48px;
+            background: var(--bg-light);
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            border: 1px solid #ddd;
+            flex-shrink: 0;
+            animation: popIn 0.2s ease-out;
+        }
+
+        .cart-item-badge {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            background-color: var(--mcdo-red);
+            color: white;
+            font-size: 11px;
+            font-weight: bold;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .checkout-btn {
+            background-color: var(--mcdo-green);
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: 30px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background-color 0.2s;
+        }
+
+        .checkout-btn:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+
+        .checkout-btn:not(:disabled):active {
+            background-color: #1b3826;
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="kiosk-screen">
+        <div class="kiosk-header">
+            <span class="logo-m">M</span>
+            Choississez votre burger
+        </div>
+
+        <!-- Zone des 3 articles demandés -->
+        <div class="products-container">
+            
+            <!-- 1. Hamburger -->
+            <div class="product-card" onclick="addToCart('p1', 'Hamburger', 2, '🍔')">
+                <div class="product-info">
+                    <span class="product-icon">🍔</span>
+                    <div class="product-details">
+                        <span class="product-name">Hamburger</span>
+                        <span class="product-price">2,00 €</span>
+                    </div>
+                </div>
+                <button class="add-btn">+</button>
+            </div>
+
+            <!-- 2. Cheese burger -->
+            <div class="product-card" onclick="addToCart('p2', 'Cheese burger', 3, '🧀')">
+                <div class="product-info">
+                    <span class="product-icon">🧀</span>
+                    <div class="product-details">
+                        <span class="product-name">Cheese burger</span>
+                        <span class="product-price">3,00 €</span>
+                    </div>
+                </div>
+                <button class="add-btn">+</button>
+            </div>
+
+            <!-- 3. Double cheese burger -->
+            <div class="product-card" onclick="addToCart('p3', 'Double cheese burger', 5, '🍔+🍔')">
+                <div class="product-info">
+                    <span class="product-icon">🍔</span>
+                    <div class="product-details">
+                        <span class="product-name">Double cheese burger</span>
+                        <span class="product-price">5,00 €</span>
+                    </div>
+                </div>
+                <button class="add-btn">+</button>
+            </div>
+
+        </div>
+
+        <!-- SECTION PANIER EN BAS -->
+        <div class="kiosk-footer-cart">
+            <div class="cart-summary">
+                <span class="cart-title" id="cart-count">Mon Panier (0)</span>
+                <span class="cart-total" id="cart-total">0,00 €</span>
+            </div>
+
+            <!-- Miniatures défilantes -->
+            <div class="cart-items-preview" id="cart-preview"></div>
+
+            <button class="checkout-btn" id="checkout-action-btn" disabled onclick="validateOrder()">
+                <span>Valider la commande</span>
+                <span>🛒</span>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let cart = {};
+
+        function addToCart(id, name, price, icon) {
+            if (cart[id]) {
+                cart[id].quantity += 1;
+            } else {
+                cart[id] = { name: name, price: price, icon: icon, quantity: 1 };
+            }
+            updateUI();
+        }
+
+        function updateUI() {
+            const preview = document.getElementById('cart-preview');
+            const countText = document.getElementById('cart-count');
+            const totalText = document.getElementById('cart-total');
+            const btn = document.getElementById('checkout-action-btn');
+
+            preview.innerHTML = '';
+            let totalQuantity = 0;
+            let totalPrice = 0;
+
+            for (const id in cart) {
+                const item = cart[id];
+                totalQuantity += item.quantity;
+                totalPrice += (item.price * item.quantity);
+
+                // Crée le petit aperçu visuel en bas
+                const thumb = document.createElement('div');
+                thumb.className = 'cart-item-thumb';
+                thumb.innerHTML = `
+                    <span style="font-size: 22px;">${item.icon === '🍔+🍔' ? '🍔' : item.icon}</span>
+                    <div class="cart-item-badge">${item.quantity}</div>
+                `;
+                preview.appendChild(thumb);
+            }
+
+            countText.innerText = `Mon Panier (${totalQuantity})`;
+            totalText.innerText = `${totalPrice.toFixed(2).replace('.', ',')} €`;
+            btn.disabled = totalQuantity === 0;
+        }
+
+        function validateOrder() {
+            alert("Commande validée ! Préparation en cuisine lancée.");
+            cart = {};
+            updateUI();
+        }
+    </script>
+</body>
+</html>
